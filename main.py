@@ -106,59 +106,59 @@ async def health_check():
         "version": settings.API_VERSION,
         "environment": os.getenv("ENVIRONMENT", "development")
     }
-    
-    @app.get("/ecommerce/test")
-    async def test_ecommerce():
-        """Test endpoint to verify e-commerce is working."""
-        return {"message": "E-commerce test endpoint is working!", "status": "ok"}
-    
-    @app.get("/ecommerce/products")
-    async def get_products(
-        limit: int = Query(20, ge=1, le=100),
-        offset: int = Query(0, ge=0)
-    ):
-        """Get a paginated list of all available products."""
-        # Return mock data for testing
-        mock_products = [
-            {
-                "id": 1,
-                "name": "Test Product 1",
-                "qty_available": 10.0,
-                "list_price": 29.99,
-                "default_code": "TEST001",
-                "description_sale": "This is a test product",
-                "barcode": "123456789",
-                "type": "consu",
-                "image_url": None,
-                "categ_id": {"id": 1, "name": "Test Category"}
-            },
-            {
-                "id": 2,
-                "name": "Test Product 2",
-                "qty_available": 5.0,
-                "list_price": 49.99,
-                "default_code": "TEST002",
-                "description_sale": "Another test product",
-                "barcode": "987654321",
-                "type": "consu",
-                "image_url": None,
-                "categ_id": {"id": 1, "name": "Test Category"}
-            }
-        ]
-        return mock_products[:limit]
-    
-    @app.get("/ecommerce/categories")
-    async def get_categories():
-        """Get a list of all product categories."""
-        # Return mock data for testing
-        return [
-            {
-                "id": 1,
-                "name": "Test Category",
-                "parent_id": None,
-                "product_count": 2
-            }
-        ]
+
+@app.get("/ecommerce/test")
+async def test_ecommerce():
+    """Test endpoint to verify e-commerce is working."""
+    return {"message": "E-commerce test endpoint is working!", "status": "ok"}
+
+@app.get("/ecommerce/products")
+async def get_products(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0)
+):
+    """Get a paginated list of all available products."""
+    # Return mock data for testing
+    mock_products = [
+        {
+            "id": 1,
+            "name": "Test Product 1",
+            "qty_available": 10.0,
+            "list_price": 29.99,
+            "default_code": "TEST001",
+            "description_sale": "This is a test product",
+            "barcode": "123456789",
+            "type": "consu",
+            "image_url": None,
+            "categ_id": {"id": 1, "name": "Test Category"}
+        },
+        {
+            "id": 2,
+            "name": "Test Product 2",
+            "qty_available": 5.0,
+            "list_price": 49.99,
+            "default_code": "TEST002",
+            "description_sale": "Another test product",
+            "barcode": "987654321",
+            "type": "consu",
+            "image_url": None,
+            "categ_id": {"id": 1, "name": "Test Category"}
+        }
+    ]
+    return mock_products[:limit]
+
+@app.get("/ecommerce/categories")
+async def get_categories():
+    """Get a list of all product categories."""
+    # Return mock data for testing
+    return [
+        {
+            "id": 1,
+            "name": "Test Category",
+            "parent_id": None,
+            "product_count": 2
+        }
+    ]
 
 app.add_middleware(
     CORSMiddleware,
