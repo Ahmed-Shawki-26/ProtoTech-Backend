@@ -51,6 +51,8 @@ async def google_login(request: Request):
             redirect_uri = redirect_uri.replace("/auth/", "/api/v1/auth/")
         elif redirect_uri.startswith("http://127.0.0.1:8000/auth/"):
             redirect_uri = redirect_uri.replace("/auth/", "/api/v1/auth/")
+        elif redirect_uri.startswith("https://prototech-backend-production.up.railway.app/auth/"):
+            redirect_uri = redirect_uri.replace("/auth/", "/api/v1/auth/")
         logger.info(f"Redirect URI: {redirect_uri} (override={'set' if configured_redirect_uri else 'auto'})")
         if not configured_redirect_uri:
             logger.warning("GOOGLE_REDIRECT_URI not set; using auto-generated URL. Ensure this exact URL is authorized in Google Console.")
