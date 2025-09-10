@@ -170,7 +170,9 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://127.0.0.1:3000",
         "http://localhost:*",  # Allow any port on localhost for development
-        "http://127.0.0.1:*"   # Allow any port on 127.0.0.1 for development
+        "http://127.0.0.1:*",  # Allow any port on 127.0.0.1 for development
+        "https://proto-tech-frontend.vercel.app",  # Vercel production frontend
+        "https://*.vercel.app"  # Allow all Vercel preview deployments
     ],
     allow_credentials=True,
     allow_methods=["*"],
