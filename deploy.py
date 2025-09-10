@@ -21,7 +21,7 @@ def check_environment():
     """Check if all required environment variables are set"""
     required_vars = [
         'DATABASE_URL',
-        'SECRET_KEY',
+        'ENCODING_SECRET_KEY',
         'STRIPE_SECRET_KEY',
         'STRIPE_WEBHOOK_SECRET',
         'ODOO_URL',
