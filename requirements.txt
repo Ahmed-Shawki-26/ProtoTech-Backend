@@ -42,3 +42,7 @@ itsdangerous>=2.0.0
 
 # File handling dependencies
 rarfile>=4.0
+
+# Graphics and rendering dependencies for Gerber processing
+cairocffi>=1.4.0
+pillow>=9.0.0

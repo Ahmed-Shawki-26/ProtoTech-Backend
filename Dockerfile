@@ -15,6 +15,10 @@ RUN apt-get update \
         gcc \
         postgresql-client \
         libpq-dev \
+        libcairo2-dev \
+        libffi-dev \
+        pkg-config \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
