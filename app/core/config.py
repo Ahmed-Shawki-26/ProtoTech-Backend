@@ -41,7 +41,7 @@ class Settings:
     STRIPE_CURRENCY: str = os.getenv("STRIPE_CURRENCY", "egp")
 
     # Odoo configuration
-    ODOO_URL: str = os.getenv("ODOO_URL", "http://localhost:8069")
+    ODOO_URL: str = os.getenv("ODOO_URL", "https://prototech.odoo.com/")
     ODOO_DB: str = os.getenv("ODOO_DB", "test")
     ODOO_USERNAME: str = os.getenv("ODOO_USERNAME", "admin")
     ODOO_PASSWORD: str = os.getenv("ODOO_PASSWORD", "admin")

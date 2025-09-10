@@ -79,7 +79,7 @@ async def test_endpoint():
     return {"message": "E-commerce router is working!", "status": "ok", "mock": ECOMMERCE_MOCK}
 
 # Odoo Configuration
-ODOO_URL = os.getenv("ODOO_URL", "http://localhost:8069")
+ODOO_URL = os.getenv("ODOO_URL", "https://prototech.odoo.com/")
 ODOO_DB = os.getenv("ODOO_DB", "test")
 ODOO_USERNAME = os.getenv("ODOO_USERNAME", "admin")
 ODOO_PASSWORD = os.getenv("ODOO_PASSWORD", "admin")
