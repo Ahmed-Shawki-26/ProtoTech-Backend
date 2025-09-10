@@ -46,3 +46,6 @@ rarfile>=4.0
 # Graphics and rendering dependencies for Gerber processing
 cairocffi>=1.4.0
 pillow>=9.0.0
+
+# Google Sheets integration
+gspread>=5.0.0
