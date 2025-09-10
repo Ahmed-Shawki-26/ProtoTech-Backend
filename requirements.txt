@@ -36,3 +36,6 @@ stripe>=8.0.0
 
 # Production Server
 gunicorn==21.2.0
+
+# Session middleware dependency
+itsdangerous>=2.0.0
