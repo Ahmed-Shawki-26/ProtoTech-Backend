@@ -47,7 +47,7 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv('SESSION_SECRET_KEY', 'fallback-secret-key'),
     same_site='lax',           # allow cookie on top-level GET redirects
-    https_only=False,          # allow over HTTP in local dev
+    https_only=os.getenv('ENVIRONMENT') == 'production',  # HTTPS in production only
     max_age=60 * 60 * 2,       # 2 hours
     session_cookie=os.getenv('SESSION_COOKIE_NAME', 'pt_session')
 )
