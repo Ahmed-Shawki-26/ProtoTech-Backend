@@ -3,7 +3,7 @@ fastapi==0.115.2
 uvicorn[standard]==0.32.0
 python-multipart==0.0.20
 pydantic==2.11.7
-pydantic-settings==2.1.0
+pydantic-settings>=2.6.1
 
 # Database and ORM
 sqlalchemy==2.0.43
