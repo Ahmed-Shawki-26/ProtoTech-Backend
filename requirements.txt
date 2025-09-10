@@ -39,3 +39,6 @@ gunicorn==21.2.0
 
 # Session middleware dependency
 itsdangerous>=2.0.0
+
+# File handling dependencies
+rarfile>=4.0
