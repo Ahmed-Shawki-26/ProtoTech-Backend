@@ -36,8 +36,8 @@ class Settings:
     # Add missing environment variables for e-commerce
     STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-    STRIPE_SUCCESS_URL: str = os.getenv("STRIPE_SUCCESS_URL", "http://localhost:5173/confirmation")
-    STRIPE_CANCEL_URL: str = os.getenv("STRIPE_CANCEL_URL", "http://localhost:5173/cart")
+    STRIPE_SUCCESS_URL: str = os.getenv("STRIPE_SUCCESS_URL", "https://proto-tech-frontend.vercel.app/confirmation")
+    STRIPE_CANCEL_URL: str = os.getenv("STRIPE_CANCEL_URL", "https://proto-tech-frontend.vercel.app/cart")
     STRIPE_CURRENCY: str = os.getenv("STRIPE_CURRENCY", "egp")
 
     # Odoo configuration

@@ -14,8 +14,8 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 # Default URLs - using shortest possible URLs to avoid length issues
-DEFAULT_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "http://localhost:5173/confirmation")
-DEFAULT_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "http://localhost:5173/cart")
+DEFAULT_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "https://proto-tech-frontend.vercel.app/confirmation")
+DEFAULT_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "https://proto-tech-frontend.vercel.app/cart")
 DEFAULT_CURRENCY = os.getenv("STRIPE_CURRENCY", "egp")  # Changed from "usd" to "egp"
 MINIMUM_CHARGE_EGP = float(os.getenv("MINIMUM_CHARGE_EGP", "25"))
 

@@ -327,7 +327,7 @@ async def register_user(db: Session, register_user_request: models.RegisterUserR
         # Send verification email
         logger.info(f"Successfully registered user: {register_user_request.email}. Sending verification email.")
         verification_token = create_email_verification_token(email=create_user_model.email)
-        frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+        frontend_url = os.getenv("FRONTEND_BASE_URL", "https://proto-tech-frontend.vercel.app")
         verification_link = f"{frontend_url}/verify-email?token={verification_token}"
         
         await send_verification_email(
@@ -358,7 +358,7 @@ async def handle_password_reset_request(db: Session, email: str) -> None:
             
         # Create reset token
         reset_token = create_password_reset_token(email)
-        frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+        frontend_url = os.getenv("FRONTEND_BASE_URL", "https://proto-tech-frontend.vercel.app")
         reset_link = f"{frontend_url}/reset-password?token={reset_token}"
         
         # Send reset email

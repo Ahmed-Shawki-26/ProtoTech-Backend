@@ -113,7 +113,7 @@ async def google_callback(request: Request, db: DbSession, response: Response):
         set_refresh_cookie(response, refresh_token)
         
         # Redirect to frontend with access token
-        frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+        frontend_url = os.getenv("FRONTEND_BASE_URL", "https://proto-tech-frontend.vercel.app")
         # Use next from session if available
         next_target = request.session.pop('post_auth_next', None)
         redirect_url = f"{frontend_url}/oauth-callback?token={access_token}&type=google"
