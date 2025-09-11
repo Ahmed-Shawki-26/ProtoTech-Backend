@@ -14,8 +14,9 @@ if __name__ == "__main__":
     print("Starting ProtoTech Backend Server (Production Mode)...")
     
     # Use Railway's PORT environment variable or default to 8000
-    port = int(os.getenv("PORT", 8000))
-    print(f"🚀 Starting server on port {port}")
+    # Force port 8000 for Railway domain compatibility
+    port = 8000
+    print(f"🚀 Starting server on port {port} (Railway compatible)")
     
     try:
         # Simple, direct uvicorn startup
