@@ -85,29 +85,5 @@ async def get_categories():
         {"id": 1, "name": "Test Category", "product_count": 2}
     ]
 
-if __name__ == "__main__":
-    print(f"🌍 Environment: {os.getenv('ENVIRONMENT', 'development')}")
-    print(f"📁 Working directory: {os.getcwd()}")
-    print(f"🔧 Python version: {sys.version}")
-    print(f"🌐 Binding to ALL interfaces (0.0.0.0) - CRITICAL for Railway")
-    
-    # Force unbuffered output
-    sys.stdout.flush()
-    
-    try:
-        # CRITICAL: Must bind to 0.0.0.0, not 127.0.0.1 or localhost
-        # Use log_level="info" instead of "debug" to reduce startup time
-        uvicorn.run(
-            app, 
-            host="0.0.0.0", 
-            port=port, 
-            log_level="info", 
-            access_log=True,
-            # Add these options to ensure fast startup
-            loop="asyncio",
-            http="httptools"
-        )
-    except Exception as e:
-        print(f"❌ Error starting server: {e}")
-        import traceback
-        traceback.print_exc()
+# Procfile will handle running the server
+# No need for if __name__ == "__main__" block
