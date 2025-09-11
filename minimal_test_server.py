@@ -9,6 +9,7 @@ import os
 import signal
 import sys
 import json
+import time
 
 # Add SIGTERM handler to detect platform shutdowns
 def handle_term(signum, frame):
