@@ -3,7 +3,8 @@ import uvicorn
 import os
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))
+    # Force port 8000 for Railway domain compatibility
+    port = 8000
     print(f"Starting ProtoTech Backend Server on port {port}")
     
     # Run the main application
