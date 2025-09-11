@@ -1,66 +1,63 @@
 #!/usr/bin/env python3
-"""
-Railway production FastAPI app
-Uses the real ProtoTech FastAPI application with all endpoints
-"""
-
-import os
-import sys
-import signal
-import time
+import os, sys, signal, time, traceback
 import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-# Add SIGTERM handler to detect platform shutdowns
 def handle_term(signum, frame):
-    print(f"⚠️ Received signal {signum} (SIGTERM) from platform at {time.time()}")
-    print("Platform is shutting down the container")
-    sys.stdout.flush()
+    print(f"⚠️ SIGTERM {signum} at {time.time()}", flush=True)
     sys.exit(0)
 
 signal.signal(signal.SIGTERM, handle_term)
 
-# Debug: Print all Railway environment variables
 print("=== RAILWAY ENVIRONMENT ===")
-for key, value in os.environ.items():
-    if key.startswith(('RAILWAY', 'PORT', 'HOST')):
-        print(f"{key}={value}")
-print("========================")
+for k, v in os.environ.items():
+    if k.startswith(("RAILWAY", "PORT", "HOST")):
+        print(f"{k}={v}")
+print("========================", flush=True)
 
-# Import the real FastAPI application
+# Try to import your real app
+app = None
 try:
-    from main import app
-    print("✅ Successfully imported main FastAPI application")
-except ImportError as e:
-    print(f"❌ Failed to import main application: {e}")
-    print("🔄 Falling back to minimal test server...")
-    
-    # Fallback to minimal server if import fails
-    from fastapi import FastAPI, Request
-    from fastapi.middleware.cors import CORSMiddleware
-    
-    app = FastAPI(title="ProtoTech API - Railway Fallback")
-    
-    # Add CORS middleware
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    
-    @app.get("/")
-    async def root():
-        return {"status": "ok", "message": "ProtoTech API fallback is running"}
-    
-    @app.get("/health")
-    async def health():
-        return {"status": "ok", "message": "Health check working"}
+    from main import app as real_app
+    app = real_app
+    print("✅ Imported FastAPI app from main", flush=True)
+except Exception as e:
+    print(f"❌ Failed to import main app: {e}", flush=True)
+    traceback.print_exc()
+    print("🔄 Falling back to minimal app...", flush=True)
+    app = FastAPI(title="ProtoTech API - Fallback")
 
-# Ensure we're getting the port correctly
-port = int(os.getenv("PORT", 8000))
-print(f"🔍 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
-print(f"🚀 Starting server on 0.0.0.0:{port}")
+# ALWAYS add CORS and a guaranteed /health on the final app
+allowed_origins = [
+    "https://proto-tech-frontend.vercel.app",
+    "https://proto-tech-frontend-9aqs0a11r-ahmedshawki2026-3667s-projects.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:8080",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8080",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,   # not "*" when allow_credentials=True
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/health", include_in_schema=False)
+async def health():
+    return {"status": "ok"}
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return {"status": "ok", "service": "ProtoTech API"}
+
+# Start server
+port = int(os.getenv("PORT") or "8080")
+print(f"🚀 Starting Uvicorn on 0.0.0.0:{port}", flush=True)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
