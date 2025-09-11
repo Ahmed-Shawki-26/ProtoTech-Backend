@@ -15,12 +15,22 @@ if __name__ == "__main__":
     print("Server will be available at: http://0.0.0.0:8000")
     print("Press Ctrl+C to stop the server")
     
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", 8000)),
-        reload=False,
-        log_level="info",
-        access_log=True,
-        workers=1
-    )
+    try:
+        uvicorn.run(
+            "main:app",
+            host="0.0.0.0",
+            port=int(os.getenv("PORT", 8000)),
+            reload=False,
+            log_level="info",
+            access_log=True,
+            workers=1
+        )
+    except Exception as e:
+        print(f"❌ Server startup error: {e}")
+        import traceback
+        traceback.print_exc()
+        # Keep the process alive for debugging
+        import time
+        while True:
+            print("🔄 Server failed, keeping container alive for debugging...")
+            time.sleep(30)

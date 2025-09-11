@@ -79,8 +79,11 @@ async def create_tables_on_startup():
         print("🔄 Starting database initialization...")
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables created successfully")
+        print("✅ FastAPI application startup completed successfully")
     except Exception as e:
         print(f"❌ Database initialization error: {e}")
+        import traceback
+        traceback.print_exc()
         # Don't fail the entire app if DB init fails
         pass
 
@@ -213,4 +216,5 @@ async def read_root():
 
 if __name__ == "__main__":
     import uvicorn
+    print("🚀 Starting FastAPI application directly...")
     uvicorn.run(app, host="0.0.0.0", port=8000)
