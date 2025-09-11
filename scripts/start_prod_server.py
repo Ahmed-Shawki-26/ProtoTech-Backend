@@ -19,6 +19,11 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     environment = os.getenv("ENVIRONMENT", "production")
     
+    # Force port 8000 if Railway domain is configured for it
+    if os.getenv("RAILWAY_ENVIRONMENT"):
+        port = 8000
+        print(f"🔄 Railway detected - using port 8000 for domain compatibility")
+    
     print(f"🔧 Configuration:")
     print(f"   - Port: {port}")
     print(f"   - Environment: {environment}")
