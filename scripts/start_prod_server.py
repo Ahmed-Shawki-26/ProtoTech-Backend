@@ -19,14 +19,14 @@ if __name__ == "__main__":
     print(f"🚀 Starting server on port {port} (Railway compatible)")
     
     try:
-        # Simple, direct uvicorn startup
+        # Simple, direct uvicorn startup with minimal app
         uvicorn.run(
-            "main:app",
+            "minimal_main:app",
             host="0.0.0.0",
             port=port,
             reload=False,
-            log_level="warning",  # Reduce log noise
-            access_log=False,     # Disable access logs for cleaner output
+            log_level="info",
+            access_log=True,
             workers=1
         )
     except Exception as e:
