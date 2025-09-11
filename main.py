@@ -55,7 +55,18 @@ app.add_middleware(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://prototech.vercel.app"],
+    allow_origins=[
+        "http://localhost:8080",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+        "http://localhost:*",  # Allow any port on localhost for development
+        "http://127.0.0.1:*",  # Allow any port on 127.0.0.1 for development
+        "https://proto-tech-frontend.vercel.app",  # Vercel production frontend
+        "https://*.vercel.app"  # Allow all Vercel preview deployments
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -110,9 +121,10 @@ else:
 @app.get("/health")
 async def health_check():
     """Health check endpoint for monitoring and load balancers"""
+    from datetime import datetime
     return {
         "status": "healthy",
-        "timestamp": "2024-01-01T00:00:00Z",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
         "version": settings.API_VERSION,
         "environment": os.getenv("ENVIRONMENT", "development")
     }
@@ -169,25 +181,6 @@ async def get_categories():
             "product_count": 2
         }
     ]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8080",
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:8080",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        "http://localhost:*",  # Allow any port on localhost for development
-        "http://127.0.0.1:*",  # Allow any port on 127.0.0.1 for development
-        "https://proto-tech-frontend.vercel.app",  # Vercel production frontend
-        "https://*.vercel.app"  # Allow all Vercel preview deployments
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.get("/", tags=["Root"])
 async def read_root():
