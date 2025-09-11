@@ -28,25 +28,29 @@ except Exception as e:
     print("🔄 Falling back to minimal app...", flush=True)
     app = FastAPI(title="ProtoTech API - Fallback")
 
-# ALWAYS add CORS and a guaranteed /health on the final app
-allowed_origins = [
-    "https://proto-tech-frontend.vercel.app",
-    "https://proto-tech-frontend-9aqs0a11r-ahmedshawki2026-3667s-projects.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:8080",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8080",
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_origin_regex=r"^https://([a-z0-9-]+\.)?vercel\.app$",  # Allow all Vercel preview deployments
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Add CORS to fallback app if main app failed to import
+if app.title == "ProtoTech API - Fallback":
+    print("🔄 Adding CORS to fallback app...", flush=True)
+    allowed_origins = [
+        "https://proto-tech-frontend.vercel.app",
+        "https://proto-tech-frontend-9aqs0a11r-ahmedshawki2026-3667s-projects.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8080",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:8080",
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_origin_regex=r"^https://([a-z0-9-]+\.)?vercel\.app$",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    print("✅ Using CORS configuration from main.py", flush=True)
 
 @app.get("/health", include_in_schema=False)
 async def health():
