@@ -43,4 +43,4 @@ EXPOSE 8000
 HEALTHCHECK NONE
 
 # Run the application
-CMD ["python", "scripts/start_prod_server.py"]
+CMD ["python", "start_ultra_minimal.py"]

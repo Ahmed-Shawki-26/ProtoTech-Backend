@@ -8,6 +8,18 @@ print("🚀 Starting ProtoTech Minimal Backend Server...")
 print(f"📁 Current working directory: {os.getcwd()}")
 print(f"🐍 Python path: {sys.executable}")
 print(f"🌍 Environment: {os.getenv('ENVIRONMENT', 'development')}")
+print(f"🔧 Python version: {sys.version}")
+print(f"📦 Installed packages: {sys.path}")
+
+# Handle missing environment variables gracefully
+try:
+    environment = os.getenv('ENVIRONMENT', 'development')
+    port = os.getenv('PORT', '8000')
+    print(f"✅ Environment variables loaded successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Environment variable issue: {e}")
+    environment = 'development'
+    port = '8000'
 
 app = FastAPI(
     title="ProtoTech Manufacturing API (Minimal)",
