@@ -52,12 +52,15 @@ async def get_categories():
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    print(f"🚀 Starting server on port {port}")
+    print(f"🚀 Starting server on 0.0.0.0:{port}")
     print(f"🌍 Environment: {os.getenv('ENVIRONMENT', 'development')}")
     print(f"📁 Working directory: {os.getcwd()}")
     print(f"🔧 Python version: {os.sys.version}")
+    print(f"🔌 PORT from environment: {port}")
+    print(f"🌐 Binding to ALL interfaces (0.0.0.0) - CRITICAL for Railway")
     
     try:
+        # CRITICAL: Must bind to 0.0.0.0, not 127.0.0.1 or localhost
         uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
     except Exception as e:
         print(f"❌ Error starting server: {e}")
