@@ -79,11 +79,12 @@ async def create_tables_on_startup():
         print("🔄 Starting database initialization...")
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables created successfully")
-        print("✅ FastAPI application startup completed successfully")
     except Exception as e:
         print(f"⚠️ Database initialization warning: {e}")
         # Don't fail the entire app if DB init fails - just log and continue
         pass
+    
+    print("✅ FastAPI application startup completed successfully")
 
 # Apply rate limiting middleware
 app.state.limiter = limiter
@@ -124,16 +125,8 @@ else:
 # Health check endpoint for production monitoring
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for monitoring and load balancers"""
-    from datetime import datetime
-    return {
-        "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "version": settings.API_VERSION,
-        "environment": os.getenv("ENVIRONMENT", "development"),
-        "service": "ProtoTech Backend API",
-        "port": os.getenv("PORT", "8000")
-    }
+    """Simple health check endpoint for Railway"""
+    return {"status": "ok"}
 
 @app.get("/railway/health")
 async def railway_health():
@@ -207,25 +200,7 @@ async def get_categories():
 @app.get("/", tags=["Root"])
 async def read_root():
     """A simple health-check endpoint."""
-    from datetime import datetime
-    return {
-        "status": "ok", 
-        "message": "Welcome to ProtoTech Manufacturing API!",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "port": os.getenv("PORT", "8000"),
-        "services": {
-            "pcb": "/api/v1/pcb",
-            "3d_printing": "/api/v1/3d-printing",
-            "pcb_layout": "/api/v1/layout",
-            # "payments": "/api/v1/stripe",  # Temporarily disabled
-            "authentication": "/api/v1/auth",
-            "users": "/api/v1/users",
-            "orders": "/api/v1/orders",
-            "cart": "/api/v1/cart",
-            "ecommerce": "/ecommerce" if ecommerce else "direct_endpoints",
-            "checkout": "/ecommerce/checkout" if ecommerce else "not_available"
-        }
-    }
+    return {"status": "ok", "message": "ProtoTech API is running"}
 
 if __name__ == "__main__":
     import uvicorn
