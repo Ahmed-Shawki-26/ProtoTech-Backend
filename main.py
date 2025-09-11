@@ -74,12 +74,15 @@ app.add_middleware(
 
 # Ensure database tables exist when the app starts (useful in dev/SQLite)
 @app.on_event("startup")
-def create_tables_on_startup():
+async def create_tables_on_startup():
     try:
+        print("🔄 Starting database initialization...")
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables created successfully")
     except Exception as e:
         print(f"❌ Database initialization error: {e}")
+        # Don't fail the entire app if DB init fails
+        pass
 
 # Apply rate limiting middleware
 app.state.limiter = limiter
@@ -133,6 +136,11 @@ async def health_check():
 async def test_ecommerce():
     """Test endpoint to verify e-commerce is working."""
     return {"message": "E-commerce test endpoint is working!", "status": "ok"}
+
+@app.get("/test")
+async def test_endpoint():
+    """Simple test endpoint that should always work."""
+    return {"message": "Backend is working!", "status": "ok", "timestamp": "2025-01-11T19:30:00Z"}
 
 @app.get("/ecommerce/products")
 async def get_products(
@@ -188,6 +196,7 @@ async def read_root():
     return {
         "status": "ok", 
         "message": "Welcome to ProtoTech Manufacturing API!",
+        "timestamp": "2025-01-11T19:30:00Z",
         "services": {
             "pcb": "/api/v1/pcb",
             "3d_printing": "/api/v1/3d-printing",
@@ -198,7 +207,7 @@ async def read_root():
             "orders": "/api/v1/orders",
             "cart": "/api/v1/cart",
             "ecommerce": "/ecommerce" if ecommerce else "direct_endpoints",
-        "checkout": "/ecommerce/checkout" if ecommerce else "not_available"
+            "checkout": "/ecommerce/checkout" if ecommerce else "not_available"
         }
     }
 
