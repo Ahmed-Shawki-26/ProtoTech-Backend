@@ -32,8 +32,20 @@ from app.database.models import Order, OrderItem, UserCart, User
 
 # Load environment variables
 import os
+import signal
+import time
+import sys
 from dotenv import load_dotenv
 load_dotenv()
+
+# Add SIGTERM handler to detect platform shutdowns
+def handle_term(signum, frame):
+    print(f"⚠️ Received signal {signum} (SIGTERM) from platform at {time.time()}")
+    print("Platform is shutting down the container")
+    sys.stdout.flush()
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_term)
 
 app = FastAPI(
     title=settings.API_TITLE,
