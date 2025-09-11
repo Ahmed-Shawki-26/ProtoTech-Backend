@@ -81,10 +81,8 @@ async def create_tables_on_startup():
         print("✅ Database tables created successfully")
         print("✅ FastAPI application startup completed successfully")
     except Exception as e:
-        print(f"❌ Database initialization error: {e}")
-        import traceback
-        traceback.print_exc()
-        # Don't fail the entire app if DB init fails
+        print(f"⚠️ Database initialization warning: {e}")
+        # Don't fail the entire app if DB init fails - just log and continue
         pass
 
 # Apply rate limiting middleware
@@ -209,10 +207,12 @@ async def get_categories():
 @app.get("/", tags=["Root"])
 async def read_root():
     """A simple health-check endpoint."""
+    from datetime import datetime
     return {
         "status": "ok", 
         "message": "Welcome to ProtoTech Manufacturing API!",
-        "timestamp": "2025-01-11T19:30:00Z",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "port": os.getenv("PORT", "8000"),
         "services": {
             "pcb": "/api/v1/pcb",
             "3d_printing": "/api/v1/3d-printing",
