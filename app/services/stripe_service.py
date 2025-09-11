@@ -4,7 +4,7 @@ import os
 from typing import Dict, Any, Optional, List, Tuple
 from fastapi import HTTPException, status
 from ..schemas.checkout import CheckoutRequest, PaymentConfirmation
-from ..email_service import send_payment_confirmation_email
+from ..core.infrastructure.email_service import send_payment_confirmation_email
 from ..services.odoo_service import get_product_by_id, execute_odoo_kw
 
 logger = logging.getLogger(__name__)

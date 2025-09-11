@@ -1,4 +1,4 @@
-# app/api/endpoints/3d_printing.py
+# app/api/endpoints/printing_3d.py
 
 import gspread
 import pandas as pd
@@ -10,9 +10,9 @@ import os
 
 router = APIRouter()
 
-# --- Google Sheets Integration ---
+# --- Enhanced Google Sheets Integration ---
 def get_3d_inventory_data():
-    """Get 3D printing inventory data from Google Sheets"""
+    """Get 3D printing inventory data from Google Sheets with enhanced error handling"""
     try:
         # Define the scope
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -31,8 +31,25 @@ def get_3d_inventory_data():
         # Read as DataFrame
         data = pd.DataFrame(worksheet.get_all_records())
         
-        # Extract short material name (e.g., "PETG")
+        # Enhanced data processing
         data['Material_Short'] = data['Material'].apply(lambda x: x.split(' ')[0])
+        data['Color_Upper'] = data['Color'].str.upper()
+        
+        # Add hex color codes for better frontend display
+        color_hex_map = {
+            'BLACK': '#000000',
+            'WHITE': '#FFFFFF', 
+            'RED': '#FF0000',
+            'BLUE': '#0000FF',
+            'GREEN': '#00FF00',
+            'YELLOW': '#FFFF00',
+            'ORANGE': '#FFA500',
+            'PURPLE': '#800080',
+            'GRAY': '#808080',
+            'GREY': '#808080'
+        }
+        data['Color_Hex'] = data['Color_Upper'].map(color_hex_map).fillna('#808080')
+        
         return data
         
     except FileNotFoundError:
@@ -40,7 +57,7 @@ def get_3d_inventory_data():
     except Exception as e:
         raise RuntimeError(f"Could not connect to Google Sheets: {e}") from e
 
-# --- Pricing Logic ---
+# --- Enhanced Pricing Logic ---
 material_densities = {
     "ABS": 1.05,
     "PLA": 1.24,

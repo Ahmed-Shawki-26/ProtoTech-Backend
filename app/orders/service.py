@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timedelta
 from .models import Order, OrderItem
-from ..schemas.user import User
+from ..users.models import User
 from ..schemas.orders import CreateOrderRequest, OrderResponse, OrderUpdateRequest
 from sqlalchemy import func
 

@@ -8,7 +8,7 @@ from ..orders.models import Order, OrderItem
 from ..cart.models import UserCart
 
 # Import User model last (after Order and UserCart are defined)
-from ..schemas.user import User
+from ..users.models import User
 
 # Export all models
 __all__ = [

@@ -13,13 +13,13 @@ import os
 import logging
 
 # Import from correct paths - import User directly to avoid circular imports
-from ..schemas.user import User
+from ..users.models import User
 from . import models
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from ..exceptions import AuthenticationError, UserNotFoundError
-from ..logging import logger
-from ..email_service import send_verification_email, send_password_reset_email
-from .. import denylist_service
+from ..core.exceptions import AuthenticationError, UserNotFoundError
+from ..core.infrastructure.logging import logger
+from ..core.infrastructure.email_service import send_verification_email, send_password_reset_email
+from ..core.infrastructure import redis_service as denylist_service
 from ..utils.password_utils import is_password_strong, verify_password, get_password_hash
 
 load_dotenv()

@@ -2,15 +2,15 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from . import models
-from ..schemas.user import User, ShippingAddressUpdate, ShippingAddressResponse
+from .models import User, ShippingAddressUpdate, ShippingAddressResponse
 from ..auth.service import CurrentUser
-from ..exceptions import (
+from ..core.exceptions import (
     UserNotFoundError,
     InvalidPasswordError,
     PasswordMismatchError,
 )
 from ..utils.password_utils import verify_password, get_password_hash, is_password_strong
-from ..logging import logger
+from ..core.infrastructure.logging import logger
 from typing import Optional
 
 

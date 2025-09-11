@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional, Tuple
 from .models import UserCart
-from ..schemas.user import User
+from ..users.models import User
 from ..services.odoo_service import get_product_by_id
 import logging
 from datetime import datetime, timedelta

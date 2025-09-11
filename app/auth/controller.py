@@ -6,11 +6,11 @@ from . import models
 from . import service
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from ..database.core import DbSession
-from ..rate_limiter import limiter
+from ..core.infrastructure.rate_limiter import limiter
 from datetime import timedelta, datetime, timezone
 import jwt
-from .. import denylist_service
-from ..logging import logger
+from ..core.infrastructure import redis_service as denylist_service
+from ..core.infrastructure.logging import logger
 from uuid import UUID, uuid4
 import os
 from urllib.parse import quote

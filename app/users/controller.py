@@ -5,7 +5,7 @@ from ..database.core import get_db
 from ..auth.service import CurrentUser
 from ..auth.service import get_current_user
 from .service import UserService
-from ..schemas.user import ShippingAddressUpdate, ShippingAddressResponse
+from .models import ShippingAddressUpdate, ShippingAddressResponse
 
 router = APIRouter(prefix="/users", tags=["users"])
 

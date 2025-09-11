@@ -13,7 +13,7 @@ from app.users.controller import router as users_router
 from app.orders.controller import router as orders_router
 from app.cart.controller import router as cart_router
 from app.database.core import Base, engine
-from app.rate_limiter import limiter
+from app.core.infrastructure.rate_limiter import limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from fastapi.responses import JSONResponse
@@ -52,13 +52,23 @@ app.add_middleware(
     session_cookie=os.getenv('SESSION_COOKIE_NAME', 'pt_session')
 )
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://prototech.vercel.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Ensure database tables exist when the app starts (useful in dev/SQLite)
 @app.on_event("startup")
 def create_tables_on_startup():
     try:
         Base.metadata.create_all(bind=engine)
+        print("✅ Database tables created successfully")
     except Exception as e:
-        print(f"Database initialization error: {e}")
+        print(f"❌ Database initialization error: {e}")
 
 # Apply rate limiting middleware
 app.state.limiter = limiter
@@ -68,7 +78,7 @@ app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(
 ))
 app.add_middleware(SlowAPIMiddleware)
 
-# Include the main API router (PCB + 3D Printing)
+# Include the main API router (PCB + 3D Printing + Layout)
 app.include_router(api_router, prefix="/api/v1")
 
 # Include Stripe router - Temporarily disabled
@@ -188,6 +198,7 @@ async def read_root():
         "services": {
             "pcb": "/api/v1/pcb",
             "3d_printing": "/api/v1/3d-printing",
+            "pcb_layout": "/api/v1/layout",
             # "payments": "/api/v1/stripe",  # Temporarily disabled
             "authentication": "/api/v1/auth",
             "users": "/api/v1/users",

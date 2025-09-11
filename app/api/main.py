@@ -1,7 +1,7 @@
 # app/api/main.py
 
 from fastapi import APIRouter
-from .endpoints import pcb, printing_3d, ecommerce
+from .endpoints import pcb, printing_3d, ecommerce, layout
 
 # Create main API router
 api_router = APIRouter()
@@ -18,6 +18,13 @@ api_router.include_router(
     printing_3d.router,
     prefix="/3d-printing",
     tags=["3D Printing"]
+)
+
+# Include PCB Layout endpoints with prefix
+api_router.include_router(
+    layout.router,
+    prefix="/layout",
+    tags=["PCB Layout Service"]
 )
 
 # Include E-commerce endpoints with prefix
