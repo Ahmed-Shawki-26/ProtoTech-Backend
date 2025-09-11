@@ -6,9 +6,20 @@ Comprehensive debugging to identify Railway routing issues
 
 import os
 import sys
+import signal
+import time
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+
+# Add SIGTERM handler to detect platform shutdowns
+def handle_term(signum, frame):
+    print(f"⚠️ Received signal {signum} (SIGTERM) from platform at {time.time()}")
+    print("Platform is shutting down the container")
+    sys.stdout.flush()
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_term)
 
 # Debug: Print all Railway environment variables
 print("=== RAILWAY ENVIRONMENT ===")
