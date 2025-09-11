@@ -15,11 +15,30 @@ if __name__ == "__main__":
     print("Server will be available at: http://0.0.0.0:8000")
     print("Press Ctrl+C to stop the server")
     
+    # Check critical environment variables
+    port = int(os.getenv("PORT", 8000))
+    environment = os.getenv("ENVIRONMENT", "production")
+    
+    print(f"🔧 Configuration:")
+    print(f"   - Port: {port}")
+    print(f"   - Environment: {environment}")
+    print(f"   - Python Path: {sys.path[0]}")
+    
+    # Check if main.py exists and is importable
     try:
+        import main
+        print("✅ main.py imported successfully")
+    except Exception as e:
+        print(f"❌ Failed to import main.py: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    try:
+        print("🚀 Starting uvicorn server...")
         uvicorn.run(
             "main:app",
             host="0.0.0.0",
-            port=int(os.getenv("PORT", 8000)),
+            port=port,
             reload=False,
             log_level="info",
             access_log=True,

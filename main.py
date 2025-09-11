@@ -132,8 +132,14 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "version": settings.API_VERSION,
-        "environment": os.getenv("ENVIRONMENT", "development")
+        "environment": os.getenv("ENVIRONMENT", "development"),
+        "service": "ProtoTech Backend API"
     }
+
+@app.get("/railway/health")
+async def railway_health():
+    """Railway-specific health check endpoint"""
+    return {"status": "ok", "message": "Railway health check passed"}
 
 @app.get("/ecommerce/test")
 async def test_ecommerce():
