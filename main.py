@@ -97,13 +97,14 @@ async def create_tables_on_startup():
     
     print("✅ FastAPI application startup completed successfully")
 
-# Apply rate limiting middleware
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(
-    status_code=429,
-    content={"detail": "Too many requests. Please try again later."}
-))
-app.add_middleware(SlowAPIMiddleware)
+# Apply rate limiting middleware - TEMPORARILY DISABLED FOR DEBUGGING
+# app.state.limiter = limiter
+# app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(
+#     status_code=429,
+#     content={"detail": "Too many requests. Please try again later."}
+# ))
+# app.add_middleware(SlowAPIMiddleware)
+print("⚠️ Rate limiting middleware temporarily disabled for debugging")
 
 # Include the main API router (PCB + 3D Printing + Layout)
 app.include_router(api_router, prefix="/api/v1")
