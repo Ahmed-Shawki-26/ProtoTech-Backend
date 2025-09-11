@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Railway debugging FastAPI app
-Comprehensive debugging to identify Railway routing issues
+Railway production FastAPI app
+Uses the real ProtoTech FastAPI application with all endpoints
 """
 
 import os
@@ -9,8 +9,6 @@ import sys
 import signal
 import time
 import uvicorn
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 
 # Add SIGTERM handler to detect platform shutdowns
 def handle_term(signum, frame):
@@ -28,73 +26,41 @@ for key, value in os.environ.items():
         print(f"{key}={value}")
 print("========================")
 
+# Import the real FastAPI application
+try:
+    from main import app
+    print("✅ Successfully imported main FastAPI application")
+except ImportError as e:
+    print(f"❌ Failed to import main application: {e}")
+    print("🔄 Falling back to minimal test server...")
+    
+    # Fallback to minimal server if import fails
+    from fastapi import FastAPI, Request
+    from fastapi.middleware.cors import CORSMiddleware
+    
+    app = FastAPI(title="ProtoTech API - Railway Fallback")
+    
+    # Add CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    
+    @app.get("/")
+    async def root():
+        return {"status": "ok", "message": "ProtoTech API fallback is running"}
+    
+    @app.get("/health")
+    async def health():
+        return {"status": "ok", "message": "Health check working"}
+
 # Ensure we're getting the port correctly
 port = int(os.getenv("PORT", 8000))
 print(f"🔍 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
 print(f"🚀 Starting server on 0.0.0.0:{port}")
 
-app = FastAPI(title="ProtoTech API - Railway Debug")
-
-# Temporarily allow all origins for debugging
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Temporarily allow all for debugging
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-async def root(request: Request):
-    return {
-        "status": "ok",
-        "message": "ProtoTech API is running",
-        "port": port,
-        "headers": dict(request.headers),
-        "client": f"{request.client.host}:{request.client.port}" if request.client else "unknown"
-    }
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "port": port, "message": "Health check working"}
-
-@app.on_event("startup")
-async def startup_event():
-    print("✅ FastAPI application startup completed successfully")
-    print("🔗 Health check endpoint available at: /health")
-    print("🔗 Root endpoint available at: /")
-    print("🔗 Debug endpoint available at: /debug/railway")
-
-@app.get("/debug/railway")
-async def debug_railway():
-    return {
-        "environment": {
-            "PORT": os.getenv("PORT"),
-            "RAILWAY_ENVIRONMENT": os.getenv("RAILWAY_ENVIRONMENT"),
-            "RAILWAY_PROJECT_ID": os.getenv("RAILWAY_PROJECT_ID"),
-            "RAILWAY_SERVICE_ID": os.getenv("RAILWAY_SERVICE_ID"),
-            "RAILWAY_DEPLOYMENT_ID": os.getenv("RAILWAY_DEPLOYMENT_ID"),
-        },
-        "server_info": {
-            "host": "0.0.0.0",
-            "port": port,
-            "pid": os.getpid(),
-        }
-    }
-
-# Add basic e-commerce endpoints for testing
-@app.get("/api/v1/ecommerce/products")
-async def get_products():
-    return [
-        {"id": 1, "name": "Test Product 1", "price": 29.99},
-        {"id": 2, "name": "Test Product 2", "price": 49.99}
-    ]
-
-@app.get("/api/v1/ecommerce/categories")
-async def get_categories():
-    return [
-        {"id": 1, "name": "Test Category", "product_count": 2}
-    ]
-
-# Procfile will handle running the server
-# No need for if __name__ == "__main__" block
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=port)
