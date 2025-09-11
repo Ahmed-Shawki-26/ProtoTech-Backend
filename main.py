@@ -133,7 +133,8 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "version": settings.API_VERSION,
         "environment": os.getenv("ENVIRONMENT", "development"),
-        "service": "ProtoTech Backend API"
+        "service": "ProtoTech Backend API",
+        "port": os.getenv("PORT", "8000")
     }
 
 @app.get("/railway/health")
@@ -149,7 +150,13 @@ async def test_ecommerce():
 @app.get("/test")
 async def test_endpoint():
     """Simple test endpoint that should always work."""
-    return {"message": "Backend is working!", "status": "ok", "timestamp": "2025-01-11T19:30:00Z"}
+    from datetime import datetime
+    return {
+        "message": "Backend is working!", 
+        "status": "ok", 
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "port": os.getenv("PORT", "8000")
+    }
 
 @app.get("/ecommerce/products")
 async def get_products(
