@@ -43,4 +43,4 @@ EXPOSE 8000
 HEALTHCHECK NONE
 
 # Run the application
-CMD ["python", "start_ultra_minimal.py"]
+CMD ["python", "-c", "import uvicorn; from ultra_minimal import app; uvicorn.run(app, host='0.0.0.0', port=int(__import__('os').getenv('PORT', 8000)))"]
