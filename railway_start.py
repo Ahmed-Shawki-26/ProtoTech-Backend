@@ -45,7 +45,14 @@ async def root(request: Request):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "port": port}
+    return {"status": "ok", "port": port, "message": "Health check working"}
+
+@app.on_event("startup")
+async def startup_event():
+    print("✅ FastAPI application startup completed successfully")
+    print("🔗 Health check endpoint available at: /health")
+    print("🔗 Root endpoint available at: /")
+    print("🔗 Debug endpoint available at: /debug/railway")
 
 @app.get("/debug/railway")
 async def debug_railway():
@@ -89,7 +96,17 @@ if __name__ == "__main__":
     
     try:
         # CRITICAL: Must bind to 0.0.0.0, not 127.0.0.1 or localhost
-        uvicorn.run(app, host="0.0.0.0", port=port, log_level="debug", access_log=True)
+        # Use log_level="info" instead of "debug" to reduce startup time
+        uvicorn.run(
+            app, 
+            host="0.0.0.0", 
+            port=port, 
+            log_level="info", 
+            access_log=True,
+            # Add these options to ensure fast startup
+            loop="asyncio",
+            http="httptools"
+        )
     except Exception as e:
         print(f"❌ Error starting server: {e}")
         import traceback
