@@ -1,5 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
+import sys
+
+# Add startup logging
+print("🚀 Starting ProtoTech Backend Server...")
+print(f"📁 Current working directory: {os.getcwd()}")
+print(f"🐍 Python path: {sys.executable}")
+print(f"🌍 Environment: {os.getenv('ENVIRONMENT', 'development')}")
 
 app = FastAPI(
     title="ProtoTech Manufacturing API",
@@ -27,6 +35,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Application startup event"""
+    print("✅ FastAPI application startup completed successfully")
+    print("🔗 Health check endpoint available at: /health")
+    print("🔗 Root endpoint available at: /")
+    print("🔗 Test endpoint available at: /test")
+
 @app.get("/")
 async def read_root():
     """A simple health-check endpoint."""
@@ -35,7 +51,19 @@ async def read_root():
 @app.get("/health")
 async def health_check():
     """Simple health check endpoint for Railway"""
-    return {"status": "ok"}
+    try:
+        # Basic health check - just return OK if the app is running
+        return {
+            "status": "ok", 
+            "message": "ProtoTech API is healthy",
+            "environment": os.getenv('ENVIRONMENT', 'development'),
+            "version": "2.0.0"
+        }
+    except Exception as e:
+        return {
+            "status": "error", 
+            "message": f"Health check failed: {str(e)}"
+        }
 
 @app.get("/test")
 async def test_endpoint():
