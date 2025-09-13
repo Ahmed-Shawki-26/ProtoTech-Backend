@@ -1,7 +1,7 @@
 # app/api/main.py
 
 from fastapi import APIRouter
-from .endpoints import pcb, printing_3d, ecommerce, layout
+from .endpoints import pcb, printing_3d, ecommerce, layout, debug_odoo
 
 # Create main API router
 api_router = APIRouter()
@@ -32,4 +32,11 @@ api_router.include_router(
     ecommerce.router,
     prefix="/ecommerce",
     tags=["E-commerce"]
+)
+
+# Include Debug Odoo endpoints with prefix
+api_router.include_router(
+    debug_odoo.router,
+    prefix="/debug",
+    tags=["Debug Odoo"]
 ) 

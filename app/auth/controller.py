@@ -153,7 +153,7 @@ async def register_user(
         raise HTTPException(status_code=500, detail="Registration failed")
 
 @router.post("/token", response_model=models.Token, status_code=status.HTTP_200_OK)
-@limiter.limit("50/hour")  # Increased rate limit for development
+# @limiter.limit("50/hour")  # Temporarily disabled for debugging
 async def login_for_access_token(
     request: Request,
     response: Response,
@@ -162,6 +162,7 @@ async def login_for_access_token(
 ):
     """Login user and return access token with refresh token in cookie."""
     try:
+        logger.info(f"Login attempt - username: {form_data.username}")
         user = service.authenticate_user(form_data.username, form_data.password, db)
         if not user:
             raise HTTPException(
@@ -352,11 +353,13 @@ async def get_current_user_info(
         user_id = token_data.get_uuid()
         
         if not user_id:
+            logger.warning("Invalid token provided to /me endpoint")
             raise HTTPException(status_code=401, detail="Invalid token")
         
         user = db.query(service.User).filter(service.User.id == user_id).first()
         if not user:
-            raise HTTPException(status_code=401, detail="User not found")
+            logger.warning(f"User not found for ID: {user_id}")
+            raise HTTPException(status_code=404, detail="User not found")
         
         return models.UserResponse(
             id=str(user.id),
@@ -371,5 +374,5 @@ async def get_current_user_info(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Get user info error: {e}")
+        logger.error(f"Get user info error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to get user information")

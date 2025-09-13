@@ -1,0 +1,376 @@
+openapi: 3.0.3
+info:
+  title: ProtoTech Manufacturing API
+  description: Complete manufacturing platform for PCB production, 3D printing, user management, and e-commerce functionality.
+  version: 2.0.0
+  contact:
+    name: ProtoTech API Support
+    email: support@prototech.com
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://prototech-backend-production.up.railway.app/api/v1
+    description: Production server
+
+paths:
+  /pcb/quotes/:
+    post:
+      summary: Generate PCB quote with Gerber file
+      description: Upload a Gerber ZIP file and get pricing quote with rendered images
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: ZIP file containing Gerber layers
+                params_json:
+                  type: string
+                  description: JSON string of ManufacturingParameters
+                  example: '{"quantity": 5, "base_material": "FR-4", "pcb_color": "Green"}'
+      responses:
+        '200':
+          description: Quote generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GerberQuoteResponse'
+        '400':
+          description: Invalid request
+        '422':
+          description: Validation error
+        '500':
+          description: Internal server error
+
+  /pcb/recalculate-price/:
+    post:
+      summary: Recalculate price based on new parameters
+      description: Recalculate the PCB quote based on dimensions and manufacturing parameters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dimensions:
+                  $ref: '#/components/schemas/BoardDimensions'
+                params:
+                  $ref: '#/components/schemas/ManufacturingParameters'
+      responses:
+        '200':
+          description: Price recalculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GerberQuoteResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+  /pcb/local-price/:
+    post:
+      summary: Calculate local manufacturing price
+      description: Calculate local manufacturing price for PCBs using local pricing rules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dimensions:
+                  $ref: '#/components/schemas/BoardDimensions'
+                params:
+                  $ref: '#/components/schemas/ManufacturingParameters'
+      responses:
+        '200':
+          description: Local price calculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceQuote'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    # Core Data Types
+    BaseMaterial:
+      type: string
+      enum: ["FR-4", "Flex", "Aluminum", "Copper Core", "Rogers", "PTFE"]
+      description: PCB base material type
+      example: "FR-4"
+
+    MinViaHole:
+      type: string
+      enum: ["0.3", "0.25", "0.2", "0.15"]
+      description: Minimum via hole size in millimeters
+      example: "0.3"
+
+    BoardOutlineTolerance:
+      type: string
+      enum: ["±0.2mm (Regular)", "±0.1mm (Precision)"]
+      description: Board outline tolerance
+      example: "±0.2mm (Regular)"
+
+    SurfaceFinish:
+      type: string
+      enum: ["Immersed Tin", "HASL", "ENIG", "OSP"]
+      description: Surface finish type
+      example: "Immersed Tin"
+
+    # Parameter Models
+    ManufacturingParameters:
+      type: object
+      required:
+        - quantity
+        - base_material
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          description: Number of PCBs to manufacture
+          example: 5
+        
+        base_material:
+          $ref: '#/components/schemas/BaseMaterial'
+        
+        different_designs:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Number of different designs
+          example: 1
+        
+        delivery_format:
+          type: string
+          enum: ["Panel by customer", "Panel by manufacturer"]
+          default: "Panel by manufacturer"
+          description: Delivery format preference
+        
+        layers:
+          type: string
+          enum: ["1", "2", "4", "6", "8", "10", "12", "14", "16"]
+          default: "2"
+          description: Number of PCB layers
+        
+        product_type:
+          type: string
+          description: Type of product/application
+          example: "Industrial/Consumer electronics"
+        
+        width_mm:
+          type: number
+          minimum: 0.1
+          maximum: 500
+          description: PCB width in millimeters
+        
+        height_mm:
+          type: number
+          minimum: 0.1
+          maximum: 500
+          description: PCB height in millimeters
+        
+        pcb_thickness_mm:
+          type: string
+          enum: ["0.8", "1.0", "1.2", "1.6", "2.0", "2.4"]
+          default: "1.6"
+          description: PCB thickness in millimeters
+        
+        pcb_color:
+          type: string
+          enum: ["Green", "Blue", "Red", "Black", "White", "Yellow"]
+          default: "Green"
+          description: PCB solder mask color
+        
+        silkscreen:
+          type: string
+          enum: ["White", "Black", "Yellow"]
+          default: "White"
+          description: Silkscreen color
+        
+        surface_finish:
+          $ref: '#/components/schemas/SurfaceFinish'
+        
+        confirm_production_file:
+          type: boolean
+          default: false
+          description: Whether to confirm production file
+        
+        electrical_test:
+          type: boolean
+          default: false
+          description: Whether to perform electrical testing
+        
+        outer_copper_weight:
+          type: string
+          enum: ["1 oz", "2 oz", "3 oz", "1/3 oz"]
+          default: "1 oz"
+          description: Outer copper weight
+        
+        via_covering:
+          type: string
+          enum: ["Tented", "Untented", "Plugged"]
+          default: "Tented"
+          description: Via covering method
+        
+        min_via_hole_size_dia:
+          $ref: '#/components/schemas/MinViaHole'
+        
+        board_outline_tolerance:
+          $ref: '#/components/schemas/BoardOutlineTolerance'
+        
+        pcb_remark:
+          type: string
+          description: Additional remarks or special requirements
+          example: "High temperature requirements"
+
+    BoardDimensions:
+      type: object
+      required:
+        - width_mm
+        - height_mm
+        - area_m2
+      properties:
+        width_mm:
+          type: number
+          description: PCB width in millimeters
+          example: 100.5
+        height_mm:
+          type: number
+          description: PCB height in millimeters
+          example: 75.2
+        area_m2:
+          type: number
+          description: PCB area in square meters
+          example: 0.00756
+
+    PriceQuote:
+      type: object
+      required:
+        - direct_cost_egp
+        - shipping_cost_egp
+        - customs_rate_egp
+        - final_price_egp
+        - currency
+      properties:
+        direct_cost_egp:
+          type: number
+          description: Direct manufacturing cost in EGP
+          example: 245.50
+        shipping_cost_egp:
+          type: number
+          description: Shipping cost in EGP
+          example: 45.00
+        customs_rate_egp:
+          type: number
+          description: Customs and duties in EGP
+          example: 12.25
+        final_price_egp:
+          type: number
+          description: Final total price in EGP
+          example: 302.75
+        currency:
+          type: string
+          description: Currency code
+          example: "EGP"
+        engineering_fees_egp:
+          type: number
+          description: Engineering fees in EGP
+          example: 25.00
+        tax_amount_egp:
+          type: number
+          description: Tax amount in EGP
+          example: 15.50
+        details:
+          type: object
+          description: Detailed pricing breakdown
+          additionalProperties: true
+
+    GerberQuoteResponse:
+      type: object
+      required:
+        - dimensions
+        - quote
+        - parameters_received
+      properties:
+        dimensions:
+          $ref: '#/components/schemas/BoardDimensions'
+        quote:
+          $ref: '#/components/schemas/PriceQuote'
+        parameters_received:
+          $ref: '#/components/schemas/ManufacturingParameters'
+
+    # Error Models
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code
+              example: "INVALID_PARAMETERS"
+            message:
+              type: string
+              description: Human-readable error message
+              example: "Invalid parameter value provided"
+            details:
+              type: object
+              description: Additional error context
+              additionalProperties: true
+
+    ValidationError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - loc
+              - msg
+            properties:
+              type:
+                type: string
+                example: "enum"
+              loc:
+                type: array
+                items:
+                  type: string
+                example: ["min_via_hole_size_dia"]
+              msg:
+                type: string
+                example: "Input should be 0.3, 0.25, 0.2 or 0.15"
+              input:
+                type: string
+                example: "0.3mm"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+security:
+  - BearerAuth: []

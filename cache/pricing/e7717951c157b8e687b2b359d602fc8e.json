@@ -1,0 +1,36 @@
+{
+  "direct_cost_egp": 144.0,
+  "shipping_cost_egp": 45.0,
+  "customs_rate_egp": 7.2,
+  "final_price_egp": 224.56799999999998,
+  "currency": "EGP",
+  "details": {
+    "base_price_egp": 144.0,
+    "material_cost_egp": 0.0,
+    "quantity_cost_egp": 0.0,
+    "thickness_cost_egp": 0.0,
+    "copper_cost_egp": 0.0,
+    "via_hole_cost_egp": 0.0,
+    "tolerance_cost_egp": 0.0,
+    "color_cost_egp": 0.0,
+    "surface_finish_cost_egp": 0.0,
+    "engineering_fees_egp": 7.2,
+    "tax_amount_egp": 21.168,
+    "multipliers": {
+      "material": 1.0,
+      "quantity": 1.0,
+      "thickness": 1.0,
+      "copper_weight": 1.0,
+      "via_hole": 1.0,
+      "tolerance": 1.0,
+      "color": 1.0,
+      "surface_finish": 1.0,
+      "silkscreen": 1.0,
+      "high_spec": 1.0,
+      "total": 1.0
+    },
+    "calculation_time_ms": 2.499103546142578,
+    "from_cache": false,
+    "status": "success"
+  }
+}

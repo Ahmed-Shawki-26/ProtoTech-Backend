@@ -1,0 +1,222 @@
+# pricing_config.yaml
+# Configuration file for pricing rules and multipliers
+# Updated with detailed material specifications
+
+# Material-specific base multipliers (matching frontend specifications)
+material_multipliers:
+  FR-4: 1.0
+  Flex: 2.5  # Higher cost for flexible PCBs
+  Aluminum: 3.0  # Higher cost for aluminum PCBs
+
+# Panel area pricing (FR-4 specific) - EGP per cm²
+panel_area_pricing:
+  FR-4:
+    "≤1000": 1.6
+    "1001-1500": 1.5
+    "1501-2000": 1.4
+    "2001-2500": 1.3
+    "2501-3000": 1.2
+    "min_price": 1.2
+
+# Quantity-based pricing brackets (matching frontend specifications)
+quantity_brackets:
+  - [5, 1.0]      # ≥5 pieces: 1x multiplier (default)
+  - [3, 1.5]      # 3-4 pieces: 1.5x multiplier
+  - [1, 2.0]      # 1-2 pieces: 2x multiplier
+
+# Thickness multipliers (matching frontend specifications)
+thickness_multipliers:
+  "0.4mm": 1.4
+  "0.6mm": 1.3
+  "0.8mm": 1.2
+  "1.0mm": 1.0
+  "1.2mm": 1.0
+  "1.6mm": 1.0      # Default/Standard
+  "2.0mm": 1.3
+  "0.12mm": 1.0     # Flex default
+
+# Copper weight multipliers (matching frontend specifications)
+copper_weight_multipliers:
+  "1/3 oz": 1.0      # Flex default
+  "1 oz": 1.0        # Default
+  "2 oz": 2.5        # High copper weight
+
+# Via hole size multipliers (matching frontend specifications)
+via_hole_multipliers:
+  "0.3mm": 1.0      # Default
+  "0.25mm": 1.3     # <0.3mm gets 1.3x multiplier
+  "0.2mm": 1.3      # <0.3mm gets 1.3x multiplier
+  "0.15mm": 1.3     # <0.3mm gets 1.3x multiplier
+
+# Board outline tolerance multipliers (matching frontend specifications)
+tolerance_multipliers:
+  "±0.2mm": 1.0      # Default
+  "±0.1mm": 1.3      # Precision tolerance
+
+# PCB color multipliers (matching frontend specifications)
+color_multipliers:
+  Green: 1.0       # Default
+  Blue: 1.2        # +1 extra day
+  Red: 1.2         # +1 extra day
+  Yellow: 1.2      # +1 extra day
+  White: 1.2       # +1 extra day
+  Black: 1.2       # +1 extra day
+
+# Surface finish multipliers (matching frontend specifications)
+surface_finish_multipliers:
+  "Immersed Tin": 1.0    # Default for all materials
+
+# Silkscreen multipliers (matching frontend specifications)
+silkscreen_multipliers:
+  White: 1.0       # Default
+  Black: 1.0       # Same as white
+
+# High specification options multipliers (matching frontend specifications)
+high_spec_multipliers:
+  confirm_production_file:
+    Yes: 1.0       # No additional cost
+    No: 1.0        # Default
+  electrical_test:
+    "optical manual inspection": 1.0    # Default for all materials
+  via_covering:
+    Tented: 1.0    # Default
+    Untented: 1.0  # Same cost
+    Plugged: 1.0   # Same cost
+  stiffener:       # Flex specific
+    without: 1.0   # Default
+    "FR-4": 1.0    # Same cost
+  emi_shielding_film:  # Flex specific
+    without: 1.0   # Default
+  cutting_method:  # Flex specific
+    laser: 1.0     # Default
+
+# Base pricing constants
+base_pricing:
+  price_per_cm2: 1.5  # Base price per cm² in EGP
+  minimum_order_value: 50.0  # Minimum order value in EGP
+  panel_setup_cost: 25.0  # Panel setup cost in EGP
+
+# Panel size limits
+panel_limits:
+  max_width_cm: 38.0
+  max_height_cm: 28.0
+
+# Panel utilization pricing brackets
+# Format: [min_utilization, multiplier]
+panel_utilization_brackets:
+  - [0.0, 1.0]    # 0-25% utilization: 1.0x
+  - [0.25, 0.9]   # 25-50% utilization: 0.9x
+  - [0.5, 0.8]    # 50-75% utilization: 0.8x
+  - [0.75, 0.7]   # 75-100% utilization: 0.7x
+
+# Fee calculations
+fees:
+  engineering_fee_percentage: 0.05  # 5% for small quantities
+  small_via_hole_fee: 25.0  # Additional fee for via holes < 0.2mm
+  precision_tolerance_fee: 15.0  # Additional fee for precision tolerance
+  heavy_copper_fee: 20.0  # Additional fee for 2oz+ copper
+  base_shipping_cost: 45.0  # Base shipping cost
+  large_quantity_shipping: 25.0  # Additional shipping for 100+ pieces
+  high_value_insurance: 15.0  # Additional insurance for 1000+ EGP orders
+
+# Tax and customs rates
+taxes:
+  vat_rate: 0.14  # 14% VAT
+  customs_rate: 0.05  # 5% customs
+
+# Cache configuration
+cache:
+  memory_size_limit: 1000  # Maximum number of entries in memory cache
+  file_cache_ttl: 3600  # File cache TTL in seconds
+  preload_common_configs: true  # Whether to preload common configurations
+
+# Validation limits
+validation:
+  max_board_width_mm: 500.0
+  max_board_height_mm: 500.0
+  max_board_area_cm2: 2500.0
+  min_board_width_mm: 5.0
+  min_board_height_mm: 5.0
+  min_board_area_cm2: 0.25
+  max_quantity: 10000
+  min_quantity: 1
+
+# Supported values based on material specifications
+supported_values:
+  materials:
+    - FR-4
+    - Flex
+    - Aluminum
+  
+  # FR-4 specifications
+  FR-4:
+    layers: [1, 2, 4, 6, 8]
+    default_layers: 2
+    thicknesses: [0.6, 0.8, 1.0, 1.2, 1.6, 2.0]
+    default_thickness: 1.6
+    colors: [green, red, blue, white, black, yellow]
+    default_color: green
+    silkscreen: [white, black]
+    default_silkscreen: white
+    surface_finishes: [HASL, ENIG, "immersed Tin"]
+    default_surface_finish: HASL
+    delivery_formats: ["single PCB", "panelized"]
+    copper_weights: [1, 2, 3]
+    default_copper_weight: 1
+  
+  # Flex specifications
+  Flex:
+    layers: [1, 2]
+    default_layers: 1
+    thicknesses: [0.12]
+    default_thickness: 0.12
+    coverlay_colors: [yellow]
+    default_coverlay_color: yellow
+    silkscreen: [white]
+    default_silkscreen: white
+    surface_finishes: ["immersion tin"]
+    default_surface_finish: "immersion tin"
+    copper_weights: ["1/3 oz"]
+    default_copper_weight: "1/3 oz"
+    coverlay_thickness: ["12.5/15"]
+    default_coverlay_thickness: "12.5/15"
+    stiffener_options: ["without", "FR-4"]
+    default_stiffener: "without"
+    emi_shielding_film: ["without"]
+    default_emi_shielding: "without"
+    cutting_methods: ["laser"]
+    default_cutting_method: "laser"
+  
+  # Aluminum specifications
+  Aluminum:
+    layers: [1]
+    default_layers: 1
+    thicknesses: [0.6, 0.8, 1.0, 1.2, 1.6, 2.0]  # Same as FR-4
+    default_thickness: 1.6
+    colors: [green, red, blue, white, black, yellow]  # Same as FR-4
+    default_color: green
+    silkscreen: [white, black]  # Same as FR-4
+    default_silkscreen: white
+    surface_finishes: [HASL, ENIG, "immersion tin"]  # Same as FR-4
+    default_surface_finish: HASL
+    copper_weights: [1]
+    default_copper_weight: 1
+    thermal_conductivity: ["1 W"]
+    default_thermal_conductivity: "1 W"
+    breakdown_voltage: ["3000 V"]
+    default_breakdown_voltage: "3000 V"
+  
+  # High specification options
+  high_spec_options:
+    impedance_control: [no, yes]
+    default_impedance_control: no
+    gold_fingers: [no, yes]
+    default_gold_fingers: no
+    stencil: [no, yes]
+    default_stencil: no
+    mark_on_pcb: [no, yes]
+    default_mark_on_pcb: no
+    confirm_production_file: [no, yes]
+    default_confirm_production_file: no
+    electrical_test: ["flying probe", "optical manual inspection"]
+    default_electrical_test: "optical manual inspection"

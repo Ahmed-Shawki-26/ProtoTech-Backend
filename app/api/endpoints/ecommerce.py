@@ -161,26 +161,41 @@ async def get_products(
     offset: int = Query(0, ge=0)
 ):
     """Get a paginated list of all available products."""
+    logger.info(f"[ECOMMERCE] Products request - limit: {limit}, offset: {offset}")
+    
     if ECOMMERCE_MOCK:
-        return _mock_get_products(limit, offset)
+        logger.info("[ECOMMERCE] Using MOCK data - ECOMMERCE_MOCK=1")
+        mock_products = _mock_get_products(limit, offset)
+        logger.info(f"[ECOMMERCE] Returning {len(mock_products)} mock products")
+        return mock_products
+    
+    logger.info("[ECOMMERCE] Attempting to fetch from Odoo...")
     try:
         domain = [['type', '=', 'consu']]
         fields = ['id', 'name', 'qty_available', 'list_price', 'default_code', 'categ_id', 'image_1920']
         args = [domain]
         kwargs = {'fields': fields, 'limit': limit, 'offset': offset}
         
+        logger.info(f"[ECOMMERCE] Odoo query - domain: {domain}, fields: {fields}")
         products_raw = execute_odoo_kw('product.product', 'search_read', args, kwargs)
         processed_products = [process_product_data(p) for p in products_raw]
         
+        logger.info(f"[ECOMMERCE] Using ODOO - fetched {len(processed_products)} products")
         return processed_products
+        
     except ConnectionError as e:
+        logger.error(f"[ECOMMERCE] Odoo connection failed: {e}")
         if ECOMMERCE_MOCK:
-            return _mock_get_products(limit, offset)
+            logger.info("[ECOMMERCE] Connection failed, falling back to MOCK data")
+            mock_products = _mock_get_products(limit, offset)
+            logger.info(f"[ECOMMERCE] Returning {len(mock_products)} mock products (fallback)")
+            return mock_products
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
             detail=f"Could not connect to the e-commerce service: {e}"
         )
     except Exception as e:
+        logger.error(f"[ECOMMERCE] Unexpected error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail=f"An internal error occurred: {e}"

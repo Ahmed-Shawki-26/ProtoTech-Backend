@@ -2,13 +2,33 @@
 # Based on pricing rules from proto_tech2-main
 
 from typing import Dict, Any, Optional
-from app.schemas.pcb import ManufacturingParameters, BoardDimensions
+from app.schemas.pcb import ManufacturingParameters, BoardDimensions, BaseMaterial
+from app.core.exceptions import PricingError, ErrorCode, raise_pricing_error
+from app.services.parameter_normalizer import ParameterNormalizer
+from app.utils.enum_helpers import get_thickness_value, safe_thickness_compare, get_thickness_multiplier
+import logging
+
+logger = logging.getLogger(__name__)
 
 class LocalPricingService:
     """
-    Local FR-4 PCB Pricing Service
+    Local PCB Pricing Service for all materials (FR-4, Flex, Aluminum)
     Implements the pricing rules from proto_tech2-main for local manufacturing
+    
+    Quantity Rules:
+    - FR-4: Uses specific quantity multipliers (5: 1.0x, 3: 1.5x, 1: 2.0x)
+    - Flex & Aluminum: Normal quantity pricing (no special multipliers)
     """
+    
+    # Material-specific base multipliers
+    MATERIAL_BASE_MULTIPLIERS = {
+        BaseMaterial.fr4: 1.0,
+        BaseMaterial.flex: 2.5,  # Flex PCBs are more expensive
+        BaseMaterial.aluminum: 3.0,  # Aluminum PCBs are more expensive
+        BaseMaterial.copper_core: 2.8,
+        BaseMaterial.rogers: 4.0,
+        BaseMaterial.ptfe_teflon: 5.0,
+    }
     
     # Base Defaults
     MAX_WIDTH_CM: float = 38.0
@@ -63,7 +83,11 @@ class LocalPricingService:
     MIN_VIA_HOLE_MULTIPLIER: float = 1.3
     
     BOARD_OUTLINE_TOLERANCE_MULTIPLIERS: Dict[str, float] = {
+        "0.2mm": 1.0,
+        "±0.2mm": 1.0,
         "±0.2mm (Regular)": 1.0,
+        "0.1mm": 1.3,
+        "±0.1mm": 1.3,
         "±0.1mm (Precision)": 1.3,
     }
     
@@ -74,14 +98,34 @@ class LocalPricingService:
     TAX_RATE: float = 0.14  # 14%
     
     @classmethod
+    def _safe_get_param(cls, params: ManufacturingParameters, attr_name: str, default_value: Any = None) -> Any:
+        """
+        Safely get parameter value, return default if not found or invalid.
+        This prevents crashes when Flex/Aluminum parameters are missing.
+        """
+        try:
+            value = getattr(params, attr_name, default_value)
+            return value if value is not None else default_value
+        except (AttributeError, TypeError):
+            return default_value
+    
+    @classmethod
     def calculate_local_price(
         cls, 
         dimensions: BoardDimensions, 
         params: ManufacturingParameters
     ) -> Dict[str, Any]:
         """
-        Calculate local FR-4 PCB manufacturing price based on proto_tech2-main rules
+        Calculate local PCB manufacturing price for all materials (FR-4, Flex, Aluminum)
+        based on proto_tech2-main rules with material-specific adjustments
         """
+        # DEBUG: Log entry point with detailed parameter info
+        logger.warning(f"DEBUG: calculate_local_price called")
+        logger.warning(f"DEBUG: dimensions = {dimensions}")
+        logger.warning(f"DEBUG: params type = {type(params)}")
+        logger.warning(f"DEBUG: thickness type = {type(params.pcb_thickness_mm)}")
+        logger.warning(f"DEBUG: thickness value = {params.pcb_thickness_mm}")
+        
         # Initialize variables
         multipliers = {}
         width_cm = dimensions.width_mm / 10.0
@@ -110,54 +154,91 @@ class LocalPricingService:
         # Rule 3: Quantity Multiplier (applied at the end, not in multipliers)
         # multipliers['quantity'] = 1.0
         
-        # Rule 4: Different Designs Multiplier
-        designs = params.different_designs
+        # Rule 4: Different Designs Multiplier (safe parameter handling)
+        designs = cls._safe_get_param(params, 'different_designs', 1)
         designs_multiplier = 1.0 + (designs - 1) * cls.DIFFERENT_DESIGNS_MULTIPLIER_FACTOR
         multipliers['designs'] = designs_multiplier
         
-        # Rule 5: Delivery Format Multiplier
+        # Rule 5: Delivery Format Multiplier (safe parameter handling)
         delivery_multiplier = 1.0
-        if params.delivery_format == "Panel by Customer":
+        delivery_format = cls._safe_get_param(params, 'delivery_format', 'Single PCB')
+        if delivery_format == "Panel by Customer":
             delivery_multiplier = 1.0 + (designs - 1) * cls.PANEL_BY_CUSTOMER_MULTIPLIER_FACTOR
         multipliers['delivery_format'] = delivery_multiplier
         
         # Rule 6: Thickness Multiplier
         thickness = params.pcb_thickness_mm
-        if 1.0 <= thickness <= 1.6:
+        
+        # DEBUG: Log thickness type and value
+        logger.warning(f"DEBUG: thickness type = {type(thickness)}")
+        logger.warning(f"DEBUG: thickness value = {thickness}")
+        
+        # Convert thickness enum to float for comparison using safe helper
+        thickness_value = get_thickness_value(thickness)
+        logger.warning(f"DEBUG: converted thickness = {thickness_value}, type = {type(thickness_value)}")
+        
+        # Special handling for Flex material - only supports 0.12mm
+        if params.base_material == BaseMaterial.flex:
+            # Flex always uses 0.12mm (default thickness), no extra cost
+            thickness_multiplier = 1.0  # No extra cost for Flex default thickness
+        elif safe_thickness_compare(thickness_value, 1.0, '>=') and safe_thickness_compare(thickness_value, 1.6, '<='):
             thickness_multiplier = 1.0
         else:
-            thickness_multiplier = cls.THICKNESS_MULTIPLIERS.get(thickness, 1.0)
+            thickness_multiplier = get_thickness_multiplier(thickness_value, cls.THICKNESS_MULTIPLIERS)
+            
         multipliers['thickness'] = thickness_multiplier
         
-        # Rule 7: Color Options
-        if params.pcb_color.lower() == "green":
+        # Rule 7: Color Options (safe parameter handling with enum support)
+        pcb_color = cls._safe_get_param(params, 'pcb_color', 'green')
+        # Handle both string and enum values
+        color_str = str(pcb_color).lower() if pcb_color else 'green'
+        
+        # Special handling for Flex material - Yellow is default and only color
+        if params.base_material == BaseMaterial.flex:
+            # Flex always uses Yellow (default color), no extra cost or days
+            color_multiplier = cls.GREEN_COLOR_MULTIPLIER  # Same as green (no extra cost)
+            extra_days = 0  # No extra working days for Flex yellow
+        # Special handling for Aluminum material - White is default and standard color
+        elif params.base_material == BaseMaterial.aluminum and 'white' in color_str:
+            # Aluminum with White is the standard configuration, no extra cost or days
+            color_multiplier = cls.GREEN_COLOR_MULTIPLIER  # Same as green (no extra cost)
+            extra_days = 0  # No extra working days for Aluminum white
+        elif 'green' in color_str:
             color_multiplier = cls.GREEN_COLOR_MULTIPLIER
         else:
             color_multiplier = cls.OTHER_COLOR_MULTIPLIER
             extra_days = cls.OTHER_COLOR_EXTRA_DAYS
+            
         multipliers['color'] = color_multiplier
         
-        # Rule 8: High-Spec Options
+        # Rule 8: High-Spec Options (safe parameter handling)
         # Copper Weight
-        copper_weight = params.outer_copper_weight
+        copper_weight = cls._safe_get_param(params, 'outer_copper_weight', '1 oz')
         copper_multiplier = cls.OUTER_COPPER_WEIGHT_MULTIPLIERS.get(copper_weight, 1.0)
         multipliers['copper_weight'] = copper_multiplier
         
-        # Via Hole
+        # Via Hole - Using ParameterNormalizer for robust handling
         via_multiplier = 1.0
         try:
-            min_via_str = params.min_via_hole_size_dia
-            # Extract first number from string like "0.3mm/(0.4/0.45mm)"
-            min_via_float = float(min_via_str.split('mm')[0])
+            min_via_value = cls._safe_get_param(params, 'min_via_hole_size_dia', 0.3)
+            # Use ParameterNormalizer for consistent handling
+            min_via_enum = ParameterNormalizer.normalize_via_hole(min_via_value)
+            min_via_float = float(min_via_enum.value.replace('mm', ''))
+            
             if min_via_float < cls.MIN_VIA_HOLE_THRESHOLD_MM:
                 via_multiplier = cls.MIN_VIA_HOLE_MULTIPLIER
-        except (ValueError, IndexError):
-            pass
+                
+        except Exception as e:
+            logger.warning(f"Failed to process via hole parameter: {e}")
+            # Use default value and continue
+            min_via_float = 0.3
         multipliers['via_hole'] = via_multiplier
         
-        # Tolerance
-        tolerance = params.board_outline_tolerance
-        tolerance_multiplier = cls.BOARD_OUTLINE_TOLERANCE_MULTIPLIERS.get(tolerance, 1.0)
+        # Tolerance (robust handling for enum values)
+        tolerance = cls._safe_get_param(params, 'board_outline_tolerance', '±0.2mm (Regular)')
+        # Handle both enum and string values
+        tolerance_str = str(tolerance) if tolerance else '±0.2mm (Regular)'
+        tolerance_multiplier = cls.BOARD_OUTLINE_TOLERANCE_MULTIPLIERS.get(tolerance_str, 1.0)
         multipliers['tolerance'] = tolerance_multiplier
         
         # Final Price Calculation
@@ -165,13 +246,24 @@ class LocalPricingService:
         for key, value in multipliers.items():
             final_price *= value
         
+        # Apply material-specific multiplier (Flex=2.5x, Aluminum=3.0x, etc.)
+        material_multiplier = cls.MATERIAL_BASE_MULTIPLIERS.get(params.base_material, 1.0)
+        final_price *= material_multiplier
+        
         # Apply quantity multiplier at the end (as per the rules)
-        quantity_multiplier = 1.0
-        for quantity_threshold, multiplier in sorted(cls.QUANTITY_MULTIPLIERS.items(), reverse=True):
-            if params.quantity >= quantity_threshold:
-                quantity_multiplier = multiplier
-                break
-        final_price = final_price * quantity_multiplier * params.quantity
+        # FR-4 has specific quantity rules, while Flex and Aluminum use normal quantity pricing
+        if params.base_material == BaseMaterial.fr4:
+            # FR-4 specific quantity multipliers
+            quantity_multiplier = 1.0
+            for quantity_threshold, multiplier in sorted(cls.QUANTITY_MULTIPLIERS.items(), reverse=True):
+                if params.quantity >= quantity_threshold:
+                    quantity_multiplier = multiplier
+                    break
+            final_price = final_price * quantity_multiplier * params.quantity
+        else:
+            # Flex and Aluminum use normal quantity pricing (no special multipliers)
+            quantity_multiplier = 1.0
+            final_price = final_price * quantity_multiplier * params.quantity
         
         # Store the price before tax for the breakdown
         price_before_tax = final_price
@@ -193,6 +285,8 @@ class LocalPricingService:
                 "cost_after_multipliers_total_quantity_egp": round(price_before_tax, 2),
                 "panel_area_cm2": round(panel_area_cm2, 2),
                 "price_per_cm2_egp": price_per_cm2,
+                "material": str(params.base_material),
+                "material_multiplier": material_multiplier,
                 "applied_multipliers": multipliers,
                 "tax_amount_egp": round(tax_amount, 2),
                 "engineering_fees_egp": engineering_fees_egp,
@@ -220,10 +314,15 @@ class LocalPricingService:
                 "minimum_cm2_price": cls.MINIMUM_CM2_PRICE_EGP,
                 "note": "Panel area is width_cm × height_cm. Pricing is capped at minimum 1.2 EGP/cm²."
             },
-            "quantity_rules": cls.QUANTITY_MULTIPLIERS,
+            "quantity_rules": {
+                "fr4": cls.QUANTITY_MULTIPLIERS,
+                "flex_aluminum": {"note": "Normal quantity pricing (no special multipliers)"}
+            },
             "thickness_rules": cls.THICKNESS_MULTIPLIERS,
             "color_rules": {
                 "green": {"multiplier": cls.GREEN_COLOR_MULTIPLIER, "extra_days": 0},
+                "flex_yellow": {"multiplier": cls.GREEN_COLOR_MULTIPLIER, "extra_days": 0, "note": "Standard color for Flex material"},
+                "aluminum_white": {"multiplier": cls.GREEN_COLOR_MULTIPLIER, "extra_days": 0, "note": "Standard color for Aluminum material"},
                 "other": {"multiplier": cls.OTHER_COLOR_MULTIPLIER, "extra_days": cls.OTHER_COLOR_EXTRA_DAYS}
             },
             "high_spec_options": {

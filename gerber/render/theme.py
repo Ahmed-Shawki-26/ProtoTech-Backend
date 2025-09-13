@@ -44,6 +44,19 @@ COLORS = {
     'flex_amber_polyimide': (0.88, 0.60, 0.25), # A rich amber/orange color
     'flex_copper': (0.75, 0.50, 0.35),         # A duller, reddish copper for traces
     'flex_pad_gold': (0.90, 0.80, 0.60),        # A light gold/tinned color for exposed pads
+        # === NEW COLORS FOR MATTE THEMES ===
+    'matte_dark_grey_mask': (0.28, 0.28, 0.30), # A deep charcoal/grey color
+    'matte_black_mask': (0.1, 0.1, 0.1),         # A very dark, near-black color
+    'silver_pad': (0.85, 0.86, 0.85),            # The light silver pad color for the grey board
+        # A very dark, slightly-off-black for the board substrate itself.
+    # This helps the traces blend in with the mask.
+    'dark_substrate': (0.12, 0.12, 0.13),
+
+    # A deep, rich matte black for the solder mask.
+    'matte_deep_black_mask': (0.05, 0.05, 0.06),
+
+    # A bright, reddish-gold color for ENIG pads, providing high contrast.
+    'enig_bright_pad': (0.85, 0.70, 0.55),
 }
 
 
@@ -103,10 +116,12 @@ THEMES = {
                       bottommask=RenderSettings(COLORS['purple soldermask'], alpha=0.85, invert=True, mirror=True),
                       topsilk=RenderSettings(COLORS['white'], alpha=0.8),
                       bottomsilk=RenderSettings(COLORS['white'], alpha=0.8, mirror=True)),
-
-    'Blue': Theme(name='Blue',
-                  topmask=RenderSettings(COLORS['blue soldermask'], alpha=0.8, invert=True),
-                  bottommask=RenderSettings(COLORS['blue soldermask'], alpha=0.8, invert=True)),
+    
+    # This existing 'Blue' theme is a simple one-color theme, not a realistic PCB render.
+    # We will create new, more realistic themes below.
+    # 'Blue': Theme(name='Blue',
+    #               topmask=RenderSettings(COLORS['blue soldermask'], alpha=0.8, invert=True),
+    #               bottommask=RenderSettings(COLORS['blue soldermask'], alpha=0.8, invert=True)),
 
     'Transparent Copper': Theme(name='Transparent',
                                 background=RenderSettings((0.9, 0.9, 0.9)),
@@ -121,7 +136,50 @@ THEMES = {
                                     drill=RenderSettings((0.3, 0.3, 0.3)),
                                     internal=[RenderSettings(x, alpha=0.5) for x in SPECTRUM[1:-1]]),
 
-    # === NEW CUSTOM THEMES ===
+    # --- NEW REALISTIC SOLDER MASK THEMES ---
+    'Purple': Theme(name='Solder Mask Purple',
+        background=RenderSettings(COLORS['fr-4']),
+        top=RenderSettings(COLORS['enig copper']),
+        bottom=RenderSettings(COLORS['enig copper'], mirror=True),
+        topmask=RenderSettings(COLORS['purple soldermask'], alpha=0.85, invert=True),
+        bottommask=RenderSettings(COLORS['purple soldermask'], alpha=0.85, invert=True, mirror=True),
+        topsilk=RenderSettings(COLORS['white']),
+        bottomsilk=RenderSettings(COLORS['white'], mirror=True),
+        drill=RenderSettings(COLORS['black'])
+    ),
+    'Red': Theme(name='Solder Mask Red',
+        background=RenderSettings(COLORS['fr-4']),
+        topmask=RenderSettings(COLORS['red soldermask'], alpha=0.85, invert=True),
+        bottommask=RenderSettings(COLORS['red soldermask'], alpha=0.85, invert=True, mirror=True),
+        top=RenderSettings(COLORS['hasl copper']),
+        bottom=RenderSettings(COLORS['hasl copper'], mirror=True),
+        topsilk=RenderSettings(COLORS['white']),
+        bottomsilk=RenderSettings(COLORS['white'], mirror=True),
+        drill=RenderSettings(COLORS['black'])
+    ),
+
+    'Blue': Theme(name='Solder Mask Blue',
+        background=RenderSettings(COLORS['fr-4']),
+        topmask=RenderSettings(COLORS['blue soldermask'], alpha=0.85, invert=True),
+        bottommask=RenderSettings(COLORS['blue soldermask'], alpha=0.85, invert=True, mirror=True),
+        top=RenderSettings(COLORS['hasl copper']),
+        bottom=RenderSettings(COLORS['hasl copper'], mirror=True),
+        topsilk=RenderSettings(COLORS['white']),
+        bottomsilk=RenderSettings(COLORS['white'], mirror=True),
+        drill=RenderSettings(COLORS['black'])
+    ),
+
+    'Black': Theme(name='Solder Mask Matte Black High Contrast',
+        background=RenderSettings(COLORS['dark_substrate']),
+        top=RenderSettings(COLORS['enig_bright_pad']),
+        bottom=RenderSettings(COLORS['enig_bright_pad'], mirror=True),
+        topmask=RenderSettings(COLORS['matte_deep_black_mask'], alpha=0.92, invert=True),
+        bottommask=RenderSettings(COLORS['matte_deep_black_mask'], alpha=0.92, invert=True, mirror=True),
+        topsilk=RenderSettings(COLORS['white']),
+        bottomsilk=RenderSettings(COLORS['white'], mirror=True),
+        drill=RenderSettings(COLORS['black'])
+    ),
+    # === Existing Custom Themes ===
     'Golden Yellow': Theme(name='Golden Yellow',
                            background=RenderSettings(COLORS['yellow soldermask']),
                            top=RenderSettings(COLORS['dull gold copper']),
@@ -140,35 +198,132 @@ THEMES = {
                           topsilk=RenderSettings(COLORS['black']),
                           bottomsilk=RenderSettings(COLORS['black'], mirror=True)),
 
+    'Yellow': Theme(name='Flex',
+        background=RenderSettings(COLORS['flex_polyimide']),
+        top=RenderSettings(COLORS['flex_copper']),
+        bottom=RenderSettings(COLORS['flex_copper'], mirror=True),
+        topmask=RenderSettings(COLORS['flex_amber_polyimide'], alpha=0.85, invert=True),
+        bottommask=RenderSettings(COLORS['flex_amber_polyimide'], alpha=0.85, invert=True, mirror=True),
+        topsilk=RenderSettings(COLORS['white']),
+        bottomsilk=RenderSettings(COLORS['white'], mirror=True),
+        drill=RenderSettings(COLORS['black'])
+    ),
+    
+    'White': Theme(name='Aluminum',
+        background=RenderSettings(COLORS['aluminum_base']),
+        top=RenderSettings(COLORS['hasl copper']),
+        bottom=RenderSettings(COLORS['hasl copper'], mirror=True),
+        topmask=RenderSettings(COLORS['white soldermask'], alpha=0.8, invert=True),
+        bottommask=RenderSettings(COLORS['white soldermask'], alpha=0.8, invert=True, mirror=True),
+        topsilk=RenderSettings(COLORS['black']),
+        bottomsilk=RenderSettings(COLORS['black'], mirror=True),
+        drill=RenderSettings(COLORS['black'])
+    ),
 
-    # === NEW THEMES FOR DIFFERENT MATERIALS ===
-
+    # === LEGACY THEMES FOR MATERIAL-BASED RENDERING ===
     'Aluminum': Theme(name='Aluminum',
-        background=RenderSettings((0.82, 0.83, 0.84)),  # لا بأس بالخلفية الحالية
-        top=RenderSettings((0.55, 0.45, 0.35)),         # نحاس داكن أو دافئ
-        bottom=RenderSettings((0.55, 0.45, 0.35), mirror=True),
-        topmask=RenderSettings((0.95, 0.95, 0.95), alpha=0.6, invert=True),
-        bottommask=RenderSettings((0.95, 0.95, 0.95), alpha=0.6, invert=True, mirror=True),
-        topsilk=RenderSettings((0.0, 0.0, 0.0), alpha=1.0),
-        bottomsilk=RenderSettings((0.0, 0.0, 0.0), alpha=1.0, mirror=True),
-        drill=RenderSettings((0.1, 0.1, 0.1), alpha=0.9)
+        background=RenderSettings(COLORS['aluminum_base']),
+        top=RenderSettings(COLORS['hasl copper']),
+        bottom=RenderSettings(COLORS['hasl copper'], mirror=True),
+        topmask=RenderSettings(COLORS['white soldermask'], alpha=0.8, invert=True),
+        bottommask=RenderSettings(COLORS['white soldermask'], alpha=0.8, invert=True, mirror=True),
+        topsilk=RenderSettings(COLORS['black']),
+        bottomsilk=RenderSettings(COLORS['black'], mirror=True),
+        drill=RenderSettings(COLORS['black'])
     ),
 
     'Flex': Theme(name='Flex',
-        background=RenderSettings((0.933, 0.933, 0.0), alpha=1.0),
-        top=RenderSettings((0.55, 0.5, 0.0)),  # نحاس أغمق لزيادة التباين
-        bottom=RenderSettings((0.55, 0.5, 0.0), mirror=True),
-        topmask=RenderSettings((0.933, 0.933, 0.0), alpha=0.6, invert=True),  # قناع شفاف أكثر
-        bottommask=RenderSettings((0.933, 0.933, 0.0), alpha=0.6, invert=True, mirror=True),
-        topsilk=RenderSettings((0.0, 0.0, 0.0), alpha=1.0),  # سيلكس أسود واضح
-        bottomsilk=RenderSettings((0.0, 0.0, 0.0), alpha=1.0, mirror=True),
-        drill=RenderSettings((0.0, 0.0, 0.0), alpha=0.9)
+        background=RenderSettings(COLORS['flex_polyimide']),
+        top=RenderSettings(COLORS['flex_copper']),
+        bottom=RenderSettings(COLORS['flex_copper'], mirror=True),
+        topmask=RenderSettings(COLORS['flex_amber_polyimide'], alpha=0.85, invert=True),
+        bottommask=RenderSettings(COLORS['flex_amber_polyimide'], alpha=0.85, invert=True, mirror=True),
+        topsilk=RenderSettings(COLORS['white']),
+        bottomsilk=RenderSettings(COLORS['white'], mirror=True),
+        drill=RenderSettings(COLORS['black'])
     ),
-
-
-
 }
 
 
 # Add a copy of Aluminum for Copper Core as they look similar
 THEMES['Copper Core'] = THEMES['Aluminum']
+
+
+# ===================================================================
+#  NEW: Neutral Themes for Base/Mask Rendering (Phase 2)
+# ===================================================================
+
+# Base theme - renders everything except solder mask
+THEMES['Base'] = Theme(name='Base Layer',
+    # Background substrate
+    background=RenderSettings(COLORS['fr-4']),
+    
+    # Copper layers (traces, pads, vias)
+    top=RenderSettings(COLORS['hasl copper']),
+    bottom=RenderSettings(COLORS['hasl copper'], mirror=True),
+    
+    # Silkscreen (component labels, logos)
+    topsilk=RenderSettings(COLORS['white']),
+    bottomsilk=RenderSettings(COLORS['white'], mirror=True),
+    
+    # Drill holes
+    drill=RenderSettings(COLORS['black']),
+    
+    # NO SOLDER MASK - will be rendered separately
+    topmask=RenderSettings(COLORS['black'], alpha=0.0),  # Transparent
+    bottommask=RenderSettings(COLORS['black'], alpha=0.0, mirror=True),  # Transparent
+)
+
+# Base theme for Flex material
+THEMES['Base_Flex'] = Theme(name='Base Layer Flex',
+    background=RenderSettings(COLORS['flex_polyimide']),
+    top=RenderSettings(COLORS['flex_copper']),
+    bottom=RenderSettings(COLORS['flex_copper'], mirror=True),
+    topsilk=RenderSettings(COLORS['white']),
+    bottomsilk=RenderSettings(COLORS['white'], mirror=True),
+    drill=RenderSettings(COLORS['black']),
+    topmask=RenderSettings(COLORS['black'], alpha=0.0),
+    bottommask=RenderSettings(COLORS['black'], alpha=0.0, mirror=True),
+)
+
+# Base theme for Aluminum material
+THEMES['Base_Aluminum'] = Theme(name='Base Layer Aluminum',
+    background=RenderSettings(COLORS['aluminum_base']),
+    top=RenderSettings(COLORS['hasl copper']),
+    bottom=RenderSettings(COLORS['hasl copper'], mirror=True),
+    topsilk=RenderSettings(COLORS['black']),
+    bottomsilk=RenderSettings(COLORS['black'], mirror=True),
+    drill=RenderSettings(COLORS['black']),
+    topmask=RenderSettings(COLORS['black'], alpha=0.0),
+    bottommask=RenderSettings(COLORS['black'], alpha=0.0, mirror=True),
+)
+
+# Mask theme - renders only solder mask with proper coverage
+THEMES['Mask'] = Theme(name='Mask Layer',
+    # Transparent background
+    background=RenderSettings(COLORS['black'], alpha=0.0),
+    
+    # All layers transparent except mask
+    top=RenderSettings(COLORS['black'], alpha=0.0),
+    bottom=RenderSettings(COLORS['black'], alpha=0.0, mirror=True),
+    topsilk=RenderSettings(COLORS['black'], alpha=0.0),
+    bottomsilk=RenderSettings(COLORS['black'], alpha=0.0, mirror=True),
+    drill=RenderSettings(COLORS['black'], alpha=0.0),
+    
+    # Solder mask with white color for compositing (RGB=1.0, alpha=coverage)
+    topmask=RenderSettings(COLORS['white'], alpha=1.0, invert=True),
+    bottommask=RenderSettings(COLORS['white'], alpha=1.0, invert=True, mirror=True),
+)
+
+# Mask theme for Flex material (coverlay)
+THEMES['Mask_Flex'] = Theme(name='Mask Layer Flex',
+    background=RenderSettings(COLORS['black'], alpha=0.0),
+    top=RenderSettings(COLORS['black'], alpha=0.0),
+    bottom=RenderSettings(COLORS['black'], alpha=0.0, mirror=True),
+    topsilk=RenderSettings(COLORS['black'], alpha=0.0),
+    bottomsilk=RenderSettings(COLORS['black'], alpha=0.0, mirror=True),
+    drill=RenderSettings(COLORS['black'], alpha=0.0),
+    # Flex coverlay with amber color
+    topmask=RenderSettings(COLORS['flex_amber_polyimide'], alpha=1.0, invert=True),
+    bottommask=RenderSettings(COLORS['flex_amber_polyimide'], alpha=1.0, invert=True, mirror=True),
+)
