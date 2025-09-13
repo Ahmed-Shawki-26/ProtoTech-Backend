@@ -62,4 +62,3 @@ aiohttp>=3.8.0
 
 # Phase 4 dependencies
 redis>=4.5.0
-gzip>=1.0
