@@ -36,9 +36,27 @@ def read(filename):
         CncFile object representing the file, either GerberFile, ExcellonFile,
         or IPCNetlist. Returns None if file is not of the proper type.
     """
-    with open(filename, 'r') as f:
-        data = f.read()
-    return loads(data, filename)
+    # Try different encodings to handle various file formats
+    encodings_to_try = ['utf-8', 'latin-1', 'cp1252', 'ascii']
+    
+    for encoding in encodings_to_try:
+        try:
+            with open(filename, 'r', encoding=encoding) as f:
+                data = f.read()
+            return loads(data, filename)
+        except UnicodeDecodeError:
+            continue
+        except Exception:
+            # If it's not an encoding issue, try the next encoding
+            continue
+    
+    # If all encodings fail, try reading as binary and decode with errors='ignore'
+    try:
+        with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
+            data = f.read()
+        return loads(data, filename)
+    except Exception as e:
+        raise ParseError(f"Could not read file {filename}: {e}")
 
 
 def loads(data, filename=None):
